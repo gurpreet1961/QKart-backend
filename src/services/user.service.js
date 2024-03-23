@@ -1,8 +1,8 @@
 const { User } = require("../models");
 const httpStatus = require("http-status");
 const ApiError = require("../utils/ApiError");
-const bcrypt = require("bcryptjs");
-const { generateAuthTokens } = require('./token.service')
+// const bcrypt = require("bcryptjs");
+// const { generateAuthTokens } = require('./token.service')
 
 
 /**
