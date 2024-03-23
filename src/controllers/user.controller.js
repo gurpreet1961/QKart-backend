@@ -32,7 +32,7 @@ const getUser = catchAsync(async (req, res) => {
   let user = await userService.getUserById(userId);
 
   if (userId != req.user._id) {
-    throw new ApiError(403, "You are not authorized");
+    throw new ApiError(400, "You are not authorized");
   }
 
   if (q) {
