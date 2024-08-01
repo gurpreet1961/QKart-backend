@@ -10,12 +10,16 @@ const ApiError = require("../utils/ApiError");
 
 
 async function getUserById(id) {
-    const userById = await User.findById(id);
-    if (!userById) {
-        throw new ApiError(httpStatus.BAD_REQUEST, "User not found")
+    try{
+        const userById = await User.findById(id);
+        if (!userById) {
+            throw new ApiError(httpStatus.BAD_REQUEST, "User not found")
+        }
+    
+        return userById;
+    }catch(e){
+        console.log(e);
     }
-
-    return userById;
 }
 
 
