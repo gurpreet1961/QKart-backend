@@ -46,12 +46,10 @@ const userSchema = mongoose.Schema(
       default: config.default_address,
     },
   },
-  // Create createdAt and updatedAt fields automatically
   {
     timestamps: true,
   }
 );
-
 
 /**
  * Check if email is taken
@@ -60,7 +58,7 @@ const userSchema = mongoose.Schema(
  */
 userSchema.statics.isEmailTaken = async function (email) {
   const user = await this.findOne({email:email});
-  return user;
+  return user?true:false;
 };
 
 userSchema.pre('save', function (next) {
@@ -68,14 +66,17 @@ userSchema.pre('save', function (next) {
     this.password = bcrypt.hashSync(this.password, salt);
   next();
 })
+// TODO: CRIO_TASK_MODULE_UNDERSTANDING_BASICS
 
+/**
+ * Check if entered password matches the user's password
+ * @param {string} password
+ * @returns {Promise<boolean>}
+ */
 userSchema.methods.isPasswordMatch = async function (password){
   return bcrypt.compare(password, this.password);
 }
 
-userSchema.methods.hasSetNonDefaultAddress = async function(){
-  return this.address !== config.default_address;
-}
 
 
 const User = mongoose.model('User', userSchema);

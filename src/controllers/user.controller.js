@@ -3,7 +3,6 @@ const ApiError = require("../utils/ApiError");
 const catchAsync = require("../utils/catchAsync");
 const { userService } = require("../services");
 
-// TODO: CRIO_TASK_MODULE_UNDERSTANDING_BASICS - Implement getUser() function
 /**
  * Get user details
  *  - Use service layer to get User data
@@ -13,6 +12,9 @@ const { userService } = require("../services");
  *  - If data exists for the provided "userId", return 200 status code and the object
  *  - If data doesn't exist, throw an error using `ApiError` class
  *    - Status code should be "404 NOT FOUND"
+ *    - Error message, "User not found"
+ *  - If the user whose token is provided and user whose data to be fetched don't match, throw `ApiError`
+ *    - Status code should be "403 FORBIDDEN"
  *    - Error message, "User not found"
  *
  * 
@@ -38,20 +40,21 @@ const { userService } = require("../services");
  * @returns {User | {address: String}}
  *
  */
-const getUser = catchAsync(async (req, res) => {const { userId } = req.params;
-  const { q } = req.query;
-  let user = await userService.getUserById(userId);
-
-  if (userId != req.user._id) {
-    throw new ApiError(400, "You are not authorized");
+const getUser = catchAsync(async (req, res) => {
+  const {userId} = req.params;
+  console.log(userId);
+  let userData = await userService.getUserById(userId);
+  if(!userData){
+    throw new ApiError(httpStatus.NOT_FOUND,"User not found");
   }
-
-  if (q) {
-    user = await userService.getUserAddressById(userId, q);
-    return res.status(200).send(user);
+  const id = req.user._id;
+  console.log(id);
+  if (userId != id) {
+    throw new ApiError(httpStatus.FORBIDDEN, "User not found");
   }
-  return res.status(200).send(user);
+  return res.status(httpStatus.OK).send(userData);
 });
+
 
 
 module.exports = {
