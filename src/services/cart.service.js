@@ -17,6 +17,11 @@ const config = require("../config/config");
  * @throws {ApiError}
  */
 const getCartByUser = async (user) => {
+  const user_cart = await Cart.findOne({email:user.email});
+  if(!user_cart){
+    throw new ApiError(404, "User does not have a cart");
+  }
+  return user_cart;
 };
 
 /**
@@ -44,6 +49,35 @@ const getCartByUser = async (user) => {
  * @throws {ApiError}
  */
 const addProductToCart = async (user, productId, quantity) => {
+  let user_cart = await Cart.findOne({email:user.email});
+  if(!user_cart){
+    try{
+      user_cart = await Cart.create({
+        email: user.email,
+        cartItems: []
+      });
+      await user_cart.save();
+    }
+    catch (error) {
+      throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Cart Not Created Something Went Wrong!!")
+    }
+
+  }
+  const cart_item = user_cart.cartItems.some((item) => item.product._id == productId);
+    if (cart_item) {
+      throw new ApiError(httpStatus.BAD_REQUEST, "Product already in cart. Use the cart sidebar to update or remove product from cart");
+    }
+
+  const product = await Product.findById(productId);
+  if (!product) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Product doesn't exist in database");
+  }
+  user_cart.cartItems.push({
+    product: product,
+    quantity: quantity
+  });
+  await user_cart.save();
+  return user_cart;
 };
 
 /**
@@ -71,6 +105,23 @@ const addProductToCart = async (user, productId, quantity) => {
  * @throws {ApiError}
  */
 const updateProductInCart = async (user, productId, quantity) => {
+  const user_cart = await Cart.findOne({ email: user.email });
+  if (!user_cart) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "User does not have a cart. Use POST to create cart and add a product")
+  }
+  const res = await Product.findOne({_id: productId});
+  if (!res) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Product doesn't exist in database");
+  }
+
+  const product = user_cart.cartItems.findIndex((i) => i.product._id == productId);
+  if (product== -1) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Product not in cart");
+  }
+  console.log(product);
+  user_cart.cartItems[product].quantity = quantity;
+  await user_cart.save();
+  return user_cart
 };
 
 /**
@@ -91,6 +142,16 @@ const updateProductInCart = async (user, productId, quantity) => {
  * @throws {ApiError}
  */
 const deleteProductFromCart = async (user, productId) => {
+  const user_cart = await Cart.findOne({email: user.email});
+  if(!user_cart){
+    throw new ApiError(httpStatus.BAD_REQUEST, "User does not have a cart");
+  }
+  const product = user_cart.cartItems.findIndex((i) => i.product._id == productId);
+  if (product === -1) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Product not in cart");
+  }
+  user_cart.cartItems.splice(product, 1);
+  await user_cart.save();
 };
 
 

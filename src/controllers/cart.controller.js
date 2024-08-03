@@ -68,6 +68,21 @@ const addProductToCart = catchAsync(async (req, res) => {
  *
  */
 const updateProductInCart = catchAsync(async (req, res) => {
+  console.log(req.body.quantity );
+  if(req.body.quantity === 0){
+    await cartService.deleteProductFromCart(
+      req.user,
+      req.body.productId
+      )
+    return res.status(204).send();
+  }
+  if(req.body.quantity > 0){
+    console.log("in the update");
+    const product = await cartService.updateProductInCart(req.user,req.body.productId,req.body.quantity)
+    return res.status(httpStatus.OK).send(
+      product
+    );
+  }
 });
 
 

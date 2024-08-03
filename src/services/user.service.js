@@ -83,6 +83,8 @@ async function createUser(user) {
  * @returns {Promise<User>}
  */
  const getUserAddressById = async (id) => {
+    return await User.findOne({_id:id}, { address: 1, email: 1 });
+
 };
 
 /**
@@ -103,4 +105,6 @@ module.exports = {
     getUserByEmail,
     getUserById,
     createUser,
+    getUserAddressById,
+    setAddress
 }
