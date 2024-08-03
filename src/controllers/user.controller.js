@@ -90,7 +90,7 @@ const setAddress = catchAsync(async (req, res) => {
   if (user.email != req.user.email) {
     throw new ApiError(
       httpStatus.FORBIDDEN,
-      "User not authorized"
+      "User not authorized to access this resource"
     );
   }
 
