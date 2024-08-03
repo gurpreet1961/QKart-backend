@@ -59,7 +59,6 @@ describe("Auth routes", () => {
       const req = httpMocks.createRequest({
         headers: { Authorization: `Bearer ${res.body.tokens.access.token}` },
       });
-      console.log(req);
       const next = jest.fn();
 
       await auth(req, httpMocks.createResponse(), next);
