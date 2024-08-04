@@ -165,7 +165,30 @@ const deleteProductFromCart = async (user, productId) => {
  * @throws {ApiError} when cart is invalid
  */
 const checkout = async (user) => {
-};
+  const user_cart = await Cart.findOne({ email: user.email });
+  if (!user_cart) {
+    throw new ApiError(httpStatus.NOT_FOUND, "User does not have a cart");
+  }
+  if (user_cart.cartItems.length === 0) {
+    throw new ApiError(400, "Cart is empty");
+  }
+  if (!(await user.hasSetNonDefaultAddress())) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Please add an Address");
+  }
+
+  const cost = user_cart.cartItems.reduce((acc, i) => {
+    return acc + i.product.cost * i.quantity;
+  }, 0);
+ 
+  if (user.walletMoney < cost) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Insufficient Balance");
+  }
+
+  user_cart.cartItems = [];
+  user.walletMoney -= cost;
+  user.save();
+  user_cart.save();
+}
 
 module.exports = {
   getCartByUser,
